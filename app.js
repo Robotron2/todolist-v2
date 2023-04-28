@@ -48,7 +48,35 @@ app.get("/", (req, res) => {
 				})
 				res.redirect("/")
 			} else {
-				res.render("list", { kindOfDay: "Today", newListItem: foundItems })
+				res.render("list", { listTitle: "Today", newListItem: foundItems })
+			}
+		}
+	})
+})
+
+const listSchema = {
+	name: String,
+	items: [itemsSchema]
+}
+
+const List = mongoose.model("List", listSchema)
+
+app.get("/:customListName", (req, res) => {
+	const customListName = req.params.customListName
+
+	List.findOne({ name: customListName }, (err, foundList) => {
+		if (!err) {
+			if (!foundList) {
+				//Create a new list here
+				const list = new List({
+					name: customListName,
+					items: defaultItems
+				})
+				list.save()
+				res.redirect("/" + customListName)
+			} else {
+				// Show an existing list
+				res.render("list", { listTitle: foundList.name, newListItem: foundList.items })
 			}
 		}
 	})
