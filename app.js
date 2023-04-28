@@ -60,8 +60,19 @@ app.post("/", (req, res) => {
 		name: itemName
 	})
 	item.save()
-
 	res.redirect("/")
+})
+
+app.post("/delete", (req, res) => {
+	const checkedItemId = req.body.checkbox
+	Item.findById(checkedItemId, (err) => {
+		if (err) {
+			console.log(err)
+		} else {
+			console.log(`Successfully deleted item with id ${checkedItemId}`)
+			res.redirect("/")
+		}
+	})
 })
 
 app.listen("4000", () => {
