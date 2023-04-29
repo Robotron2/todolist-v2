@@ -1,6 +1,7 @@
 const express = require("express")
 const bodyParser = require("body-parser")
 const mongoose = require("mongoose")
+const _ = require("lodash")
 
 const app = express()
 app.set("view engine", "ejs") //Tell your app to use ejs as the view engine. Must be under the app declaration
@@ -62,7 +63,7 @@ const listSchema = {
 const List = mongoose.model("List", listSchema)
 
 app.get("/:customListName", (req, res) => {
-	const customListName = req.params.customListName
+	const customListName = _.capitalize(req.params.customListName)
 
 	List.findOne({ name: customListName }, (err, foundList) => {
 		if (!err) {
