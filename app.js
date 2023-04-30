@@ -79,25 +79,39 @@ const listSchema = {
 
 const List = mongoose.model("List", listSchema)
 
-app.get("/:customListName", (req, res) => {
+app.get("/:customListName", async (req, res) => {
 	const customListName = _.capitalize(req.params.customListName)
 
-	List.findOne({ name: customListName }, (err, foundList) => {
-		if (!err) {
-			if (!foundList) {
-				//Create a new list here
-				const list = new List({
-					name: customListName,
-					items: defaultItems
-				})
-				list.save()
-				res.redirect("/" + customListName)
-			} else {
-				// Show an existing list
-				res.render("list", { listTitle: foundList.name, newListItem: foundList.items })
-			}
-		}
-	})
+	const foundList = await List.findOne({ name: customListName }).exec()
+
+	if (foundList !== null) {
+		res.render("list", { listTitle: foundList.name, newListItem: foundList.items })
+	} else {
+		//Create a new list here
+		const list = new List({
+			name: customListName,
+			items: defaultItems
+		})
+		list.save()
+		res.redirect("/" + customListName)
+	}
+
+	// List.findOne({ name: customListName }, (err, foundList) => {
+	// 	if (!err) {
+	// 		if (!foundList) {
+	// //Create a new list here
+	// const list = new List({
+	// 	name: customListName,
+	// 	items: defaultItems
+	// })
+	// list.save()
+	// res.redirect("/" + customListName)
+	// 		} else {
+	// 			// Show an existing list
+	// res.render("list", { listTitle: foundList.name, newListItem: foundList.items })
+	// 		}
+	// 	}
+	// })
 })
 
 app.post("/", (req, res) => {
