@@ -33,26 +33,43 @@ const item3 = new Item({
 
 let defaultItems = [item1, item2, item3]
 
-app.get("/", (req, res) => {
+app.get("/", async (req, res) => {
 	// res.send("Welcome to my page");
-	Item.find({}, (err, foundItems) => {
-		if (err) {
-			console.log(err)
-		} else {
-			if (foundItems.length === 0) {
-				Item.insertMany(defaultItems, (err) => {
-					if (err) {
-						console.log(err)
-					} else {
-						console.log("Successfully saved the item to the DB")
-					}
-				})
-				res.redirect("/")
+	let foundItems = await Item.find({})
+	// console.log(foundItems)
+	if (foundItems.length === 0) {
+		Item.insertMany(defaultItems, function (err) {
+			if (!err) {
+				console.log("Successfully saved the item to the DB")
 			} else {
-				res.render("list", { listTitle: "Today", newListItem: foundItems })
+				console.log(err)
 			}
-		}
-	})
+		})
+	} else {
+		res.render("list", { listTitle: "Today", newListItem: foundItems })
+	}
+
+	// Item.find({}).then(function (err, foundItems) {
+	// 	console.log(foundItems)
+	// })
+	// Item.find({}, (err, foundItems) => {
+	// 	if (err) {
+	// 		console.log(err)
+	// 	} else {
+	// 		if (foundItems.length === 0) {
+	// 			Item.insertMany(defaultItems, (err) => {
+	// 				if (err) {
+	// 					console.log(err)
+	// 				} else {
+	// 					console.log("Successfully saved the item to the DB")
+	// 				}
+	// 			})
+	// 			res.redirect("/")
+	// 		} else {
+	// 			res.render("list", { listTitle: "Today", newListItem: foundItems })
+	// 		}
+	// 	}
+	// })
 })
 
 const listSchema = {
