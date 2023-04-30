@@ -36,13 +36,7 @@ let defaultItems = [item1, item2, item3]
 app.get("/", async (req, res) => {
 	let foundItems = await Item.find({})
 	if (foundItems.length === 0) {
-		Item.insertMany(defaultItems, function (err) {
-			if (!err) {
-				console.log("Successfully saved the item to the DB")
-			} else {
-				console.log(err)
-			}
-		})
+		Item.insertMany(defaultItems)
 	} else {
 		res.render("list", { listTitle: "Today", newListItem: foundItems })
 	}
@@ -67,33 +61,11 @@ app.get("/lists/:customListName", async (req, res) => {
 			items: defaultItems
 		})
 		await list.save()
-		// res.redirect(`/lists/${customListName}`)
-		// res.redirect("/")
-		res.redirect("lists/" + customListName)
+
+		res.redirect("/lists/" + customListName)
 	} else {
 		res.render("list", { listTitle: foundList.name, newListItem: foundList.items })
 	}
-
-	// if (foundList === null) {
-	// res.render("list", { listTitle: foundList.name, newListItem: foundList.items })
-	//}
-
-	// List.findOne({ name: customListName }, (err, foundList) => {
-	// 	if (!err) {
-	// 		if (!foundList) {
-	// //Create a new list here
-	// const list = new List({
-	// 	name: customListName,
-	// 	items: defaultItems
-	// })
-	// list.save()
-	// res.redirect("/" + customListName)
-	// 		} else {
-	// 			// Show an existing list
-	// res.render("list", { listTitle: foundList.name, newListItem: foundList.items })
-	// 		}
-	// 	}
-	// })
 })
 
 app.post("/", async (req, res) => {
@@ -104,51 +76,50 @@ app.post("/", async (req, res) => {
 	})
 
 	if (listName === "Today") {
-		// item.save()
-		console.log("List name is Today")
-		// res.redirect("/")
+		item.save()
+		res.redirect("/")
 	} else {
 		const foundList = await List.findOne({ name: listName })
 		if (foundList) {
 			foundList.items.push(item)
 			foundList.save()
-			// mongoose.connection.close()
 			res.redirect(`/lists/${listName}`)
-			console.log("Foundddd and done")
+			// console.log("Foundddd and done")
 		}
 	}
 })
 
-// List.findOne({ name: listName }, (err, foundList) => {
-// 	if (err) {
-// 		console.log(err)
-// 	} else {
-// 	foundList.items.push(item)
-// 	foundList.save()
-// 	res.redirect("/" + listName)
-// }
-// })
-
-app.post("/delete", (req, res) => {
+app.post("/delete", async (req, res) => {
 	const checkedItemId = req.body.checkbox
 	const listName = req.body.listName
 
 	if (listName === "Today") {
-		Item.findByIdAndDelete(checkedItemId, (err) => {
-			if (err) {
-				console.log(err)
-			} else {
-				console.log(`Successfully deleted item with id ${checkedItemId}`)
-				res.redirect("/")
-			}
-		})
-	} else {
-		List.findOneAndUpdate({ name: listName }, { $pull: { items: { _id: checkedItemId } } }, (err, foundList) => {
-			if (!err) {
-				res.redirect("/" + listName)
-			}
-		})
+		await Item.findByIdAndDelete(checkedItemId)
+		res.redirect("/")
 	}
+
+	//let foundItems = [1, 2, 3, 45, 5] // Prophet Ayo Jeje prophesying to Mike Orokpo
+
+	// if (listName === "Today") {
+	// 	if (foundItems.length === 1) {
+	// 		console.log("No more items to delete. Reload now")
+	// 		res.redirect("/")
+	// 	}
+	// 	if (foundItems.length !== 0) {
+	// 		await Item.findByIdAndDelete(checkedItemId)
+	// 		console.log(`Successfully deleted item with ID: ${checkedItemId}`)
+	// 		res.redirect("/")
+	// 	}
+	// 	console.log(foundItems.length)
+	// } else {
+	// 	List.findByIdAndUpdate({ name: listName }, { $pull: { items: { _id: checkedItemId } } })
+	// 	res.redirect(`/lists/${listName}`)
+	// 	// List.findOneAndUpdate({ name: listName }, { $pull: { items: { _id: checkedItemId } } }, (err, foundList) => {
+	// 	// 	if (!err) {
+	// 	// 		res.redirect("/" + listName)
+	// 	// 	}
+	// 	// })
+	// }
 })
 
 app.listen("4000", () => {
