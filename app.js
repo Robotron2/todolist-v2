@@ -9,7 +9,7 @@ app.set("view engine", "ejs") //Tell your app to use ejs as the view engine. Mus
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.static("public"))
 
-mongoose.connect("mongodb://localhost:27017/todoListDB", { useNewUrlParser: true })
+mongoose.connect("mongodb://localhost:27017/todoListDB")
 
 const itemsSchema = {
 	name: {
@@ -34,9 +34,7 @@ const item3 = new Item({
 let defaultItems = [item1, item2, item3]
 
 app.get("/", async (req, res) => {
-	// res.send("Welcome to my page");
 	let foundItems = await Item.find({})
-	// console.log(foundItems)
 	if (foundItems.length === 0) {
 		Item.insertMany(defaultItems, function (err) {
 			if (!err) {
@@ -48,28 +46,6 @@ app.get("/", async (req, res) => {
 	} else {
 		res.render("list", { listTitle: "Today", newListItem: foundItems })
 	}
-
-	// Item.find({}).then(function (err, foundItems) {
-	// 	console.log(foundItems)
-	// })
-	// Item.find({}, (err, foundItems) => {
-	// 	if (err) {
-	// 		console.log(err)
-	// 	} else {
-	// 		if (foundItems.length === 0) {
-	// 			Item.insertMany(defaultItems, (err) => {
-	// 				if (err) {
-	// 					console.log(err)
-	// 				} else {
-	// 					console.log("Successfully saved the item to the DB")
-	// 				}
-	// 			})
-	// 			res.redirect("/")
-	// 		} else {
-	// 			res.render("list", { listTitle: "Today", newListItem: foundItems })
-	// 		}
-	// 	}
-	// })
 })
 
 const listSchema = {
@@ -79,22 +55,28 @@ const listSchema = {
 
 const List = mongoose.model("List", listSchema)
 
-app.get("/:customListName", async (req, res) => {
+app.get("/lists/:customListName", async (req, res) => {
 	const customListName = _.capitalize(req.params.customListName)
 
 	const foundList = await List.findOne({ name: customListName }).exec()
 
-	if (foundList !== null) {
-		res.render("list", { listTitle: foundList.name, newListItem: foundList.items })
-	} else {
+	if (foundList === null) {
 		//Create a new list here
 		const list = new List({
 			name: customListName,
 			items: defaultItems
 		})
-		list.save()
-		res.redirect("/" + customListName)
+		await list.save()
+		// res.redirect(`/lists/${customListName}`)
+		// res.redirect("/")
+		res.redirect("lists/" + customListName)
+	} else {
+		res.render("list", { listTitle: foundList.name, newListItem: foundList.items })
 	}
+
+	// if (foundList === null) {
+	// res.render("list", { listTitle: foundList.name, newListItem: foundList.items })
+	//}
 
 	// List.findOne({ name: customListName }, (err, foundList) => {
 	// 	if (!err) {
@@ -114,7 +96,7 @@ app.get("/:customListName", async (req, res) => {
 	// })
 })
 
-app.post("/", (req, res) => {
+app.post("/", async (req, res) => {
 	const itemName = req.body.newItem
 	const listName = req.body.list
 	const item = new Item({
@@ -122,20 +104,30 @@ app.post("/", (req, res) => {
 	})
 
 	if (listName === "Today") {
-		item.save()
-		res.redirect("/")
+		// item.save()
+		console.log("List name is Today")
+		// res.redirect("/")
 	} else {
-		List.findOne({ name: listName }, (err, foundList) => {
-			if (err) {
-				console.log(err)
-			} else {
-				foundList.items.push(item)
-				foundList.save()
-				res.redirect("/" + listName)
-			}
-		})
+		const foundList = await List.findOne({ name: listName })
+		if (foundList) {
+			foundList.items.push(item)
+			foundList.save()
+			// mongoose.connection.close()
+			res.redirect(`/lists/${listName}`)
+			console.log("Foundddd and done")
+		}
 	}
 })
+
+// List.findOne({ name: listName }, (err, foundList) => {
+// 	if (err) {
+// 		console.log(err)
+// 	} else {
+// 	foundList.items.push(item)
+// 	foundList.save()
+// 	res.redirect("/" + listName)
+// }
+// })
 
 app.post("/delete", (req, res) => {
 	const checkedItemId = req.body.checkbox
