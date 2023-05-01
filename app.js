@@ -96,6 +96,14 @@ app.post("/delete", async (req, res) => {
 	if (listName === "Today") {
 		await Item.findByIdAndDelete(checkedItemId)
 		res.redirect("/")
+	} else {
+		try {
+			const updatedResult = await List.findOneAndUpdate({ name: listName }, { $pull: { items: { _id: checkedItemId } } })
+			console.log(updatedResult)
+			res.redirect("/lists/" + listName)
+		} catch (error) {
+			console.log(error + "Errrrrr")
+		}
 	}
 
 	//let foundItems = [1, 2, 3, 45, 5] // Prophet Ayo Jeje prophesying to Mike Orokpo
