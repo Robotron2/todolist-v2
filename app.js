@@ -9,7 +9,7 @@ app.set("view engine", "ejs") //Tell your app to use ejs as the view engine. Mus
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.static("public"))
 
-mongoose.connect("mongodb://localhost:27017/todoListDB")
+mongoose.connect("mongodb+srv://admin-theo:Test123@cluster0.wz55twn.mongodb.net/todoListDB")
 
 const itemsSchema = {
 	name: {
@@ -105,29 +105,6 @@ app.post("/delete", async (req, res) => {
 			console.log(error + "Errrrrr")
 		}
 	}
-
-	//let foundItems = [1, 2, 3, 45, 5] // Prophet Ayo Jeje prophesying to Mike Orokpo
-
-	// if (listName === "Today") {
-	// 	if (foundItems.length === 1) {
-	// 		console.log("No more items to delete. Reload now")
-	// 		res.redirect("/")
-	// 	}
-	// 	if (foundItems.length !== 0) {
-	// 		await Item.findByIdAndDelete(checkedItemId)
-	// 		console.log(`Successfully deleted item with ID: ${checkedItemId}`)
-	// 		res.redirect("/")
-	// 	}
-	// 	console.log(foundItems.length)
-	// } else {
-	// 	List.findByIdAndUpdate({ name: listName }, { $pull: { items: { _id: checkedItemId } } })
-	// 	res.redirect(`/lists/${listName}`)
-	// 	// List.findOneAndUpdate({ name: listName }, { $pull: { items: { _id: checkedItemId } } }, (err, foundList) => {
-	// 	// 	if (!err) {
-	// 	// 		res.redirect("/" + listName)
-	// 	// 	}
-	// 	// })
-	// }
 })
 
 app.listen("4000", () => {
