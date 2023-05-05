@@ -1,8 +1,8 @@
 <%- include('./partials/header.ejs') %>
-    <div class="container mt-4 mb-4">
-        <h3>
-            <%=listTitle%>
-        </h3>
+    <div class="container mt-4 mb-4 header-text text-center">
+        <h4>
+            <%=listTitle%> List
+        </h4>
     </div>
     <div class="container">
         <div class="row">
@@ -12,9 +12,9 @@
                         <form action="/" method="post">
                             <div class="d-flex">
                                 <input type="text" class="form-control add-task m-1" placeholder="New Task..."
-                                    name="newItem">
+                                    name="newItem" required>
                                 <button type="submit" name="list" value="<%= listTitle %>"
-                                    class="btn btn-outline-primary m-1">+</button>
+                                    class="btn purple-btn m-1">+</button>
                             </div>
                         </form>
 
