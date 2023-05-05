@@ -9,7 +9,8 @@ app.set("view engine", "ejs") //Tell your app to use ejs as the view engine. Mus
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.static("public"))
 
-mongoose.connect("mongodb+srv://admin-theo:Test123@cluster0.wz55twn.mongodb.net/todoListDB")
+mongoose.connect("mongodb://localhost:27017/todoListDB")
+// mongoose.connect("mongodb+srv://admin-theo:Test123@cluster0.wz55twn.mongodb.net/todoListDB")
 
 const itemsSchema = {
 	name: {
@@ -71,6 +72,7 @@ app.get("/lists/:customListName", async (req, res) => {
 app.post("/", async (req, res) => {
 	const itemName = req.body.newItem
 	const listName = req.body.list
+
 	const item = new Item({
 		name: itemName
 	})
@@ -95,11 +97,13 @@ app.post("/delete", async (req, res) => {
 
 	if (listName === "Today") {
 		await Item.findByIdAndDelete(checkedItemId)
+		console.log("Deleted successfully.")
 		res.redirect("/")
 	} else {
 		try {
 			const updatedResult = await List.findOneAndUpdate({ name: listName }, { $pull: { items: { _id: checkedItemId } } })
-			console.log(updatedResult)
+			// console.log(updatedResult)
+			console.log("Deleted successfully on newlist")
 			res.redirect("/lists/" + listName)
 		} catch (error) {
 			console.log(error + "Errrrrr")
