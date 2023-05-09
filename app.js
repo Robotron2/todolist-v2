@@ -26,6 +26,7 @@ const userSchema = new mongoose.Schema({
 	},
 	useremail: {
 		type: String,
+		unique: true,
 		required: true
 	},
 	password: {
@@ -97,13 +98,24 @@ app.post("/signup", (req, res) => {
 		})
 		.catch((err) => {
 			// console.log(err)
-			res.send(err)
+			// res.send(err)
+			if (err.code) {
+				res.send("Email has already been used")
+				// Create an error page that displays the error properly. Create buttons that can link to the signUp page.
+			}
 		})
 })
 
-app.post("/users/:userId", (req, res) => {
+app.post("/users/:userId", async (req, res) => {
 	const userId = req.params.userId
-	console.log(userId)
+	await User.findById(userId)
+		.then((user) => {
+			console.log(user)
+		})
+		.catch((err) => {
+			console.log(err)
+		})
+	// console.log(userId)
 })
 
 // app.get("/", async (req, res) => {
