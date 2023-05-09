@@ -40,16 +40,6 @@ const User = mongoose.model("User", userSchema)
 const Item = mongoose.model("Item", itemsSchema)
 //create new doc
 
-const item1 = new Item({
-	name: "Welcome to your todo list app"
-})
-const item2 = new Item({
-	name: "Hit the + to add a new item"
-})
-const item3 = new Item({
-	name: "<-- Hit this to delete an item."
-})
-
 let defaultItem = {
 	name: "Default. Delete me after entering your first todo."
 }
@@ -65,9 +55,17 @@ app.get("/signup", (req, res) => {
 	res.render("signup")
 })
 
-app.get("/users/:usersname", (req, res) => {
-	const userName = req.params.usersname
-	res.render("list", { usersTodos: [defaultItem], listTitle: userName })
+app.get("/users/:userId", async (req, res) => {
+	const userId = req.params.userId
+
+	User.findById(userId)
+		.then((user) => {
+			console.log(user.username)
+			res.render("list", { usersTodos: [defaultItem, user.itemsList], listTitle: user.username, userId })
+		})
+		.catch((err) => {
+			console.log(err)
+		})
 })
 
 //////////////////////////////////////////Post Requests //////////////////////////////////////////////////////
@@ -87,15 +85,25 @@ app.post("/signup", (req, res) => {
 	})
 	newUser
 		.save()
-		.then((result) => {
+		.then(async (result) => {
 			console.log("User saved successfully to the DB!")
 			// console.log(result)
-			res.redirect(`/users/${userName}`)
+			await User.findOne({ useremail: userEmail }).then((user) => {
+				// console.log(user._id == "645aa1a9267d7861a27aceb0")
+				res.redirect(`/users/${user._id}`)
+			})
+
+			// res.redirect(`/users/${userName}`)
 		})
 		.catch((err) => {
 			// console.log(err)
 			res.send(err)
 		})
+})
+
+app.post("/users/:userId", (req, res) => {
+	const userId = req.params.userId
+	console.log(userId)
 })
 
 // app.get("/", async (req, res) => {
