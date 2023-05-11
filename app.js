@@ -128,6 +128,27 @@ app.post("/login", (req, res) => {
 		})
 })
 
+app.post("/users/:userId", async (req, res) => {
+	// const todo = req.body.newItem
+	const userId = req.params.userId
+
+	const todo = new Item({
+		name: req.body.newItem
+	})
+
+	await User.findById(userId)
+		.then(async (user) => {
+			user.userTodo.push(todo)
+			await user.save().then(() => {
+				console.log("Updated successfully.")
+				res.redirect(`/users/${user._id}`)
+			})
+		})
+		.catch((err) => {
+			console.log(err)
+		})
+})
+
 app.post("/delete", (req, res) => {
 	const checkedItemId = req.body.checkbox
 	const userId = req.body.userId
