@@ -72,6 +72,40 @@ app.get("/users/:userId", async (req, res) => {
 
 //////////////////////////////////////////Post Requests //////////////////////////////////////////////////////
 
+app.post("/signup", (req, res) => {
+	const userName = req.body.userName
+	const userEmail = req.body.userEmail
+	const userPassword = req.body.userPassword
+
+	// console.log(userEmail, userPassword, userName)
+
+	const newUser = new User({
+		username: userName,
+		useremail: userEmail,
+		password: userPassword
+	})
+	newUser
+		.save()
+		.then(async (result) => {
+			console.log("User saved successfully to the DB!")
+			// console.log(result)
+			await User.findOne({ useremail: userEmail }).then((user) => {
+				// console.log(user._id == "645aa1a9267d7861a27aceb0")
+				res.redirect(`/users/${user._id}`)
+			})
+
+			// res.redirect(`/users/${userName}`)
+		})
+		.catch((err) => {
+			// console.log(err)
+			// res.send(err)
+			if (err.code) {
+				res.send("Email has already been used")
+				// Create an error page that displays the error properly. Create buttons that can link to the signUp page.
+			}
+		})
+})
+
 app.post("/delete", (req, res) => {
 	const checkedItemId = req.body.checkbox
 	const userId = req.body.userId
