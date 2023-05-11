@@ -106,6 +106,28 @@ app.post("/signup", (req, res) => {
 		})
 })
 
+app.post("/login", (req, res) => {
+	const email = req.body.userEmail
+	const password = req.body.userPassword
+
+	User.findOne({ useremail: email })
+		.then((user) => {
+			if (user) {
+				if (user.password == password) {
+					res.redirect(`/users/${user._id}`)
+				} else {
+					res.send("Invalid password")
+				}
+			} else {
+				res.send("User not found")
+			}
+			// console.log(user)
+		})
+		.catch((err) => {
+			console.log(err)
+		})
+})
+
 app.post("/delete", (req, res) => {
 	const checkedItemId = req.body.checkbox
 	const userId = req.body.userId
