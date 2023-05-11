@@ -33,7 +33,8 @@ const userSchema = new mongoose.Schema({
 		type: String,
 		required: true
 	},
-	itemsList: [itemsSchema]
+	userTodo: [itemsSchema]
+	// userTodo: [{ type: mongoose.Schema.Types.ObjectId, ref: "itemsSchema" }]
 })
 
 const User = mongoose.model("User", userSchema)
@@ -41,9 +42,9 @@ const User = mongoose.model("User", userSchema)
 const Item = mongoose.model("Item", itemsSchema)
 //create new doc
 
-let defaultItem = {
-	name: "Default. Delete me after entering your first todo."
-}
+// let defaultItem = {
+// 	name: "Default. Delete me after entering your first todo."
+// }
 
 app.get("/", async (req, res) => {
 	res.render("home")
@@ -61,8 +62,8 @@ app.get("/users/:userId", async (req, res) => {
 
 	User.findById(userId)
 		.then((user) => {
-			console.log(user.username)
-			res.render("list", { usersTodos: [defaultItem, user.itemsList], listTitle: user.username, userId })
+			// console.log(user)
+			res.render("list", { usersTodos: user.userTodo, listTitle: user.username, userId })
 		})
 		.catch((err) => {
 			console.log(err)
@@ -71,51 +72,28 @@ app.get("/users/:userId", async (req, res) => {
 
 //////////////////////////////////////////Post Requests //////////////////////////////////////////////////////
 
-app.post("/signup", (req, res) => {
-	const userName = req.body.userName
-	const userEmail = req.body.userEmail
-	const userPassword = req.body.userPassword
+app.post("/delete", (req, res) => {
+	const checkedItemId = req.body.checkbox
+	const userId = req.body.userId
 
-	// console.log(userEmail, userPassword, userName)
+	console.log("checkedItemId:" + checkedItemId)
+	console.log("userId:" + userId)
 
-	const newUser = new User({
-		username: userName,
-		useremail: userEmail,
-		password: userPassword,
-		itemsList: defaultItem
-	})
-	newUser
-		.save()
-		.then(async (result) => {
-			console.log("User saved successfully to the DB!")
-			// console.log(result)
-			await User.findOne({ useremail: userEmail }).then((user) => {
-				// console.log(user._id == "645aa1a9267d7861a27aceb0")
-				res.redirect(`/users/${user._id}`)
-			})
-
-			// res.redirect(`/users/${userName}`)
-		})
-		.catch((err) => {
-			// console.log(err)
-			// res.send(err)
-			if (err.code) {
-				res.send("Email has already been used")
-				// Create an error page that displays the error properly. Create buttons that can link to the signUp page.
-			}
-		})
-})
-
-app.post("/users/:userId", async (req, res) => {
-	const userId = req.params.userId
-	await User.findById(userId)
-		.then((user) => {
-			console.log(user)
-		})
-		.catch((err) => {
-			console.log(err)
-		})
-	// console.log(userId)
+	// User.findOneAndUpdate({ _id: userId }, { $pull: { userTodo: { _id: checkedItemId } } }, { new: true })
+	// 	.then((result) => {
+	// 		// console.log(result)
+	// 		res.redirect(`/users/${userId}`)
+	// 	})
+	// 	.catch((err) => {
+	// 		console.log(err)
+	// 	})
+	// User.findByIdAndUpdate(userId, { $pull: { userTodo: { _id: checkedItemId } } })
+	// 	.then((result) => {
+	// 		console.log(result)
+	// 	})
+	// 	.catch((err) => {
+	// 		console.log(err)
+	// 	})
 })
 
 // app.get("/", async (req, res) => {
@@ -200,9 +178,3 @@ app.post("/users/:userId", async (req, res) => {
 app.listen("4000", () => {
 	console.log("Server started on port 4000")
 })
-
-// <% newListItem.forEach(item=> {%>
-//     <a class="dropdown-item" href="/">
-//         <%= listTitle %>
-//     </a>
-//     <%}); %>
