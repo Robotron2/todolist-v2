@@ -2,12 +2,26 @@ const express = require("express")
 const bodyParser = require("body-parser")
 const mongoose = require("mongoose")
 const _ = require("lodash")
+const session = require("express-session")
+const passport = require("passport")
+const passportLocalMongoose = require("passport-local-mongoose")
 
 const app = express()
 app.set("view engine", "ejs") //Tell your app to use ejs as the view engine. Must be under the app declaration
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.static("public"))
+app.use(
+	session({
+		secret: "Our little secret",
+		resave: false,
+		saveUninitialized: false,
+		cookie: { secure: true }
+	})
+)
+
+app.use(passport.initialize())
+app.use(passport.session())
 
 mongoose.connect("mongodb://localhost:27017/todoListDB")
 // mongoose.connect("mongodb+srv://theophilusadesola002:Test123@todolistcluster.pgb1wum.mongodb.net/")
@@ -31,14 +45,20 @@ const userSchema = new mongoose.Schema({
 		required: true
 	},
 	password: {
-		type: String,
-		required: true
+		type: String
 	},
 	userTodo: [itemsSchema]
 	// userTodo: [{ type: mongoose.Schema.Types.ObjectId, ref: "itemsSchema" }]
 })
 
+userSchema.plugin(passportLocalMongoose)
+
 const User = mongoose.model("User", userSchema)
+
+passport.use(User.createStrategy())
+
+passport.serializeUser(User.serializeUser())
+passport.deserializeUser(User.deserializeUser())
 
 const Item = mongoose.model("Item", itemsSchema)
 //create new doc
@@ -61,52 +81,94 @@ app.get("/signup", (req, res) => {
 app.get("/users/:userId", async (req, res) => {
 	const userId = req.params.userId
 
-	User.findById(userId)
-		.then((user) => {
-			// console.log(user)
-			res.render("list", { usersTodos: user.userTodo, listTitle: user.username, userId })
-		})
-		.catch((err) => {
-			console.log(err)
-			//You can create a 404 page here.
-		})
+	if (req.isAuthenticated) {
+		User.findById(userId)
+			.then((user) => {
+				// console.log(user)
+				res.render("list", { usersTodos: user.userTodo, listTitle: user.username, userId })
+			})
+			.catch((err) => {
+				console.log(err)
+				//You can create a 404 page here.
+			})
+	} else {
+		res.redirect("/login")
+	}
 })
+// app.get("/users/:userId", async (req, res) => {
+// const userId = req.params.userId
+
+// User.findById(userId)
+// 	.then((user) => {
+// 		// console.log(user)
+// 		res.render("list", { usersTodos: user.userTodo, listTitle: user.username, userId })
+// 	})
+// 	.catch((err) => {
+// 		console.log(err)
+// 		//You can create a 404 page here.
+// 	})
+// })
 
 //////////////////////////////////////////Post Requests //////////////////////////////////////////////////////
 
 app.post("/signup", (req, res) => {
-	const userName = req.body.userName
-	const userEmail = req.body.userEmail
-	const userPassword = req.body.userPassword
+	let username = _.upperFirst(req.body.username)
+	let email = _.toLower(req.body.email)
+	let password = req.body.password
+	// console.log(req.body)
+	User.register({ username, useremail: email }, password, (err, user) => {
+		if (err) {
+			console.log(err)
+			res.redirect("/signup")
+		} else {
+			passport.authenticate("local")(req, res, async function () {
+				await User.findOne({ useremail: email })
+					.then((user) => {
+						console.log("We was here")
+						res.redirect(`/users/${user._id}`)
+					})
+					.catch((err) => {
+						console.log(err)
+					})
+			})
+		}
+	})
 
 	// console.log(userEmail, userPassword, userName)
-
-	const newUser = new User({
-		username: userName,
-		useremail: userEmail,
-		password: userPassword
-	})
-	newUser
-		.save()
-		.then(async (result) => {
-			// console.log("User saved successfully to the DB!")
-			// console.log(result)
-			await User.findOne({ useremail: userEmail }).then((user) => {
-				// console.log(user._id == "645aa1a9267d7861a27aceb0")
-				res.redirect(`/users/${user._id}`)
-			})
-
-			// res.redirect(`/users/${userName}`)
-		})
-		.catch((err) => {
-			// console.log(err)
-			// res.send(err)
-			if (err.code) {
-				res.send("Email has already been used")
-				// Create an error page that displays the error properly. Create buttons that can link to the signUp page.
-			}
-		})
 })
+// app.post("/signup", (req, res) => {
+// 	const userName = req.body.userName
+// 	const userEmail = req.body.userEmail
+// 	const userPassword = req.body.userPassword
+
+// 	// console.log(userEmail, userPassword, userName)
+
+// 	const newUser = new User({
+// 		username: userName,
+// 		useremail: userEmail,
+// 		password: userPassword
+// 	})
+// 	newUser
+// 		.save()
+// 		.then(async (result) => {
+// 			// console.log("User saved successfully to the DB!")
+// 			// console.log(result)
+// 			await User.findOne({ useremail: userEmail }).then((user) => {
+// 				// console.log(user._id == "645aa1a9267d7861a27aceb0")
+// 				res.redirect(`/users/${user._id}`)
+// 			})
+
+// 			// res.redirect(`/users/${userName}`)
+// 		})
+// 		.catch((err) => {
+// 			// console.log(err)
+// 			// res.send(err)
+// 			if (err.code) {
+// 				res.send("Email has already been used")
+// 				// Create an error page that displays the error properly. Create buttons that can link to the signUp page.
+// 			}
+// 		})
+// })
 
 app.post("/login", (req, res) => {
 	const email = req.body.userEmail
