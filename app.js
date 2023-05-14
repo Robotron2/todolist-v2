@@ -16,7 +16,8 @@ const itemsSchema = new mongoose.Schema({
 	name: {
 		type: String,
 		required: true
-	}
+	},
+	_id: Number
 })
 
 const userSchema = new mongoose.Schema({
@@ -67,6 +68,7 @@ app.get("/users/:userId", async (req, res) => {
 		})
 		.catch((err) => {
 			console.log(err)
+			//You can create a 404 page here.
 		})
 })
 
@@ -87,7 +89,7 @@ app.post("/signup", (req, res) => {
 	newUser
 		.save()
 		.then(async (result) => {
-			console.log("User saved successfully to the DB!")
+			// console.log("User saved successfully to the DB!")
 			// console.log(result)
 			await User.findOne({ useremail: userEmail }).then((user) => {
 				// console.log(user._id == "645aa1a9267d7861a27aceb0")
@@ -133,7 +135,8 @@ app.post("/users/:userId", async (req, res) => {
 	const userId = req.params.userId
 
 	const todo = new Item({
-		name: req.body.newItem
+		name: req.body.newItem,
+		_id: Math.floor(Math.random() * 84600)
 	})
 
 	await User.findById(userId)
@@ -150,11 +153,29 @@ app.post("/users/:userId", async (req, res) => {
 })
 
 app.post("/delete", (req, res) => {
-	const checkedItemId = req.body.checkbox
+	const checkedItemId = parseInt(req.body.checkbox)
 	const userId = req.body.userId
 
-	console.log("checkedItemId:" + checkedItemId)
-	console.log("userId:" + userId)
+	User.findById(userId).then((user) => {
+		let filteredTodo = user.userTodo.filter((todo) => todo._id !== checkedItemId)
+		// console.log(filteredTodo)
+		User.findByIdAndUpdate(userId, { userTodo: filteredTodo }, { new: true })
+			.then(() => {
+				res.redirect(`/users/${user._id}`)
+			})
+			.catch((err) => {
+				res.send(err)
+			})
+	})
+
+	// console.log("checkedItemId:" + checkedItemId)
+
+	// console.log("userId:" + userId)
+
+	// User.findByIdAndUpdate({ _id: userId }).then((user) => {
+	// 	console.log(typeof user.userTodo.id)
+	// 	// console.log(user)
+	// })
 
 	// User.findOneAndUpdate({ _id: userId }, { $pull: { userTodo: { _id: checkedItemId } } }, { new: true })
 	// 	.then((result) => {
