@@ -1,11 +1,12 @@
 {
-	"name": "todolist-v1",
+	"name": "todolist-v2",
 	"version": "1.0.0",
 	"description": "A todolist app using EJS",
 	"main": "app.js",
 	"type": "module",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "nodemon app.js"
 	},
 	"author": "Theophilus",
 	"license": "ISC",
