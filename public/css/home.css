@@ -1,0 +1,82 @@
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+body {
+	font-family: "PT Sans Caption", "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+	font-size: 3vh;
+}
+
+#header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 15vmax;
+}
+
+#logo {
+	text-decoration: none;
+	color: white;
+	font-size: 5vh;
+	font-weight: bold;
+}
+
+.hero {
+	display: flex;
+	flex-direction: column;
+	/* justify-content: space-between; */
+	height: 100vh;
+	padding: 1.5em;
+	box-sizing: border-box;
+	color: white;
+	background: url(https://images.unsplash.com/photo-1500417148159-68083bd7333a) center center no-repeat;
+	background-size: cover;
+}
+
+.hero-title {
+	/* max-width: 16em; */
+	width: 100%;
+	margin-bottom: 1em;
+	font-size: 6vh;
+	font-weight: bold;
+	line-height: 0.9;
+}
+
+@media only screen and (min-width: 32em) {
+	.hero-title {
+		font-size: 8vh;
+	}
+}
+
+.hero-btn {
+	display: flex;
+	margin-bottom: 1em;
+}
+
+.button {
+	padding: 0.5em 0.67em;
+	color: white;
+	text-decoration: none;
+	border-radius: 5px;
+	border: 0.1em solid white;
+}
+
+.button-white {
+	color: #443947;
+	background-color: white;
+}
+
+.button-white:hover {
+	color: white;
+	background-color: #443947;
+}
+
+.button-dark {
+	color: white;
+	background-color: #443947;
+}
+.button-dark:hover {
+	color: #443947;
+	background-color: white;
+}
