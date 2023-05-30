@@ -4,7 +4,6 @@ const bodyParser = require("body-parser")
 const mongoose = require("mongoose")
 const _ = require("lodash")
 const bcrypt = require("bcrypt")
-const jwt = require("jsonwebtoken")
 // const session = require("express-session")
 // const passport = require("passport")
 // const passportLocalMongoose = require("passport-local-mongoose")
@@ -76,20 +75,13 @@ app.get("/signup", (req, res) => {
 
 app.get("/users/:userId", async (req, res) => {
 	const userId = req.params.userId
-
-	if (req.isAuthenticated) {
-		User.findById(userId)
-			.then((user) => {
-				// console.log(user)
-				res.render("list", { usersTodos: user.userTodo, listTitle: user.username, userId })
-			})
-			.catch((err) => {
-				console.log(err)
-				//You can create a 404 page here.
-			})
-	} else {
-		res.redirect("/login")
-	}
+	await User.findById(userId).then((user) => {
+		if (user) {
+			res.render("list", { usersTodos: user.userTodo, listTitle: user.username, userId })
+		} else {
+			res.redirect("/login")
+		}
+	})
 })
 
 //////////////////////////////////////////Post Requests //////////////////////////////////////////////////////
@@ -133,31 +125,33 @@ app.post("/signup", async (req, res) => {
 })
 
 app.post("/login", (req, res) => {
-	const username = _.upperFirst(req.body.username)
-	const email = _.toLower(req.body.userEmail)
-	const password = req.body.password
-
-	const user = new User({
-		username: username,
-		useremail: email,
-		password: password
-	})
-	req.login(user, (err) => {
-		if (err) {
-			console.log(err)
-		} else {
-			passport.authenticate("local")(req, res, async function () {
-				await User.findOne({ useremail: email })
-					.then((user) => {
-						console.log("We was here")
-						res.redirect(`/users/${user._id}`)
+	try {
+		const { useremail, password } = req.body
+		// console.log(req.body)
+		User.findOne({ useremail })
+			.then(async (user) => {
+				console.log(password, user.password)
+				if (user) {
+					bcrypt.compare(password, user.password, async (err, result) => {
+						if (result) {
+							res.redirect(`/users/${user._id}`)
+						} else {
+							res.redirect("/login")
+						}
 					})
-					.catch((err) => {
-						console.log(err)
-					})
+				}
 			})
-		}
-	})
+			.catch((err) => {
+				console.log(err)
+			})
+	} catch (error) {
+		console.log(error)
+		res.status(500).send({
+			success: false,
+			message: "Error in login",
+			error
+		})
+	}
 })
 
 app.post("/users/:userId", async (req, res) => {
