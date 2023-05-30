@@ -10,11 +10,12 @@
                 <div class="card card-white">
                     <div class="card-body">
                         <form action="/users/<%= userId %>" method="post">
-                            <div class="d-flex">
-                                <input type="text" class="form-control add-task m-1" placeholder="New Task..."
-                                    name="newItem" required>
-                                <button type="submit" name="list" value="<%= listTitle %>"
-                                    class="btn purple-btn m-1">+</button>
+                            <div class="d-flex p-0">
+                                <input type="text" class="form-control add-task " placeholder="New Task..."
+                                    name="newItem" required autocomplete="off">
+                                <button type="submit" name="list" value="<%= listTitle %>" class="btn purple-btn ">
+                                    <i class='bx bx-plus-medical purple'></i>
+                                </button>
                             </div>
                         </form>
 
@@ -39,46 +40,12 @@
                                     </div>
                                     <%}); %>
                                         <% } %>
-
-
-
-
-                                            <!-- <% if (usersTodos.length) { %>
-                                <% usersTodos.forEach(item=> {%>
-                                    <div class="todo-item">
-                                        <form action="/delete" method="post">
-                                            <div class="checker">
-                                                <span class="col-lg-6 col-md-3 col-sm-2">
-                                                    <input type="checkbox" onchange="this.form.submit()" name="checkbox"
-                                                        value="<%= item._id %>">
-                                                    <input type="hidden" name="listName" value="<%= listTitle %>">
-                                                </span>
-                                            </div>
-                                            <span>
-                                                <%= item.name%>
-                                            </span>
-                                        </form>
-                                    </div>
-                                    <%}); %>
-
-                                        <%}%> -->
-
-
-
-
-
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-
-
-
-
-
 
 
 

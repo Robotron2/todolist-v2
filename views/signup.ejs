@@ -25,7 +25,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href='https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css' rel='stylesheet'>
         <link rel="stylesheet" href="/css/loginstyle.css">
-        <title>Sign Up</title>
+        <title>Sign Up || RobotodolistApp</title>
     </head>
 
     <body>
@@ -38,24 +38,25 @@
             <form action="/signup" method="post">
                 <div class="field">
                     <span class="bx bxs-user"></span>
-                    <input type="text" name="username" placeholder="Firstname here" required>
+                    <input type="text" name="username" placeholder="Firstname here" required autocomplete="off">
                 </div>
 
                 <div class="field">
                     <span class="bx bxs-envelope"></span>
-                    <input type="email" name="email" placeholder="Email here" required>
+                    <input type="email" name="email" placeholder="Email here" required autocomplete="off">
                 </div>
 
                 <div class="field">
                     <span class="bx bxs-lock-alt"></span>
-                    <input type="password" name="password" placeholder="Password here" required>
+                    <input type="password" name="password" placeholder="Password here" required autocomplete="off">
                 </div>
                 <div class="field">
                     <span class="bx bxs-lock-alt"></span>
-                    <input type="Text" name="answer" placeholder="Secret word" required>
+                    <input type="Text" name="answer" placeholder="Secret word" required autocomplete="off">
                 </div>
 
                 <button type="submit">Sign Up</button>
+                <button type="button"><a href="/login">Login</a></button>
             </form>
         </div>
 

@@ -76,6 +76,9 @@ body {
 .purple {
 	color: #701b79 !important;
 }
+.purple:hover {
+	color: #ffff !important;
+}
 
 .purple-btn:hover {
 	color: var(--light);
@@ -146,6 +149,15 @@ div.uploader {
 	background: #fff;
 	border-radius: calc(0.15rem - 1px);
 	box-shadow: 0 1px 15px rgba(0, 0, 0, 0.04), 0 1px 6px rgba(0, 0, 0, 0.04);
+}
+
+footer {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	text-align: center;
+	color: #fff;
+	font-size: 1.2em;
 }
 
 /* 

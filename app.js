@@ -4,9 +4,7 @@ const bodyParser = require("body-parser")
 const mongoose = require("mongoose")
 const _ = require("lodash")
 const bcrypt = require("bcrypt")
-// const session = require("express-session")
-// const passport = require("passport")
-// const passportLocalMongoose = require("passport-local-mongoose")
+const JWT = require("jsonwebtoken")
 
 const app = express()
 app.set("view engine", "ejs") //Tell your app to use ejs as the view engine. Must be under the app declaration
@@ -17,50 +15,43 @@ app.use(express.static("public"))
 mongoose.connect("mongodb://localhost:27017/todoListDB")
 // mongoose.connect("mongodb+srv://theophilusadesola002:Test123@todolistcluster.pgb1wum.mongodb.net/")
 
-const itemsSchema = new mongoose.Schema({
-	name: {
-		type: String,
-		required: true
+const itemsSchema = new mongoose.Schema(
+	{
+		name: {
+			type: String,
+			required: true
+		},
+		_id: Number
 	},
-	_id: Number
-})
+	{ timestamps: true }
+)
 
-const userSchema = new mongoose.Schema({
-	username: {
-		type: String,
-		required: true
+const userSchema = new mongoose.Schema(
+	{
+		username: {
+			type: String,
+			required: true
+		},
+		useremail: {
+			type: String,
+			unique: true,
+			required: true
+		},
+		password: {
+			type: String
+		},
+		answer: {
+			type: String,
+			required: true
+		},
+		userTodo: [itemsSchema]
 	},
-	useremail: {
-		type: String,
-		unique: true,
-		required: true
-	},
-	password: {
-		type: String
-	},
-	answer: {
-		type: String,
-		required: true
-	},
-	userTodo: [itemsSchema]
-	// userTodo: [{ type: mongoose.Schema.Types.ObjectId, ref: "itemsSchema" }]
-})
-
-// userSchema.plugin(passportLocalMongoose)
+	{ timestamps: true }
+)
 
 const User = mongoose.model("User", userSchema)
 
-// passport.use(User.createStrategy())
-
-// passport.serializeUser(User.serializeUser())
-// passport.deserializeUser(User.deserializeUser())
-
 const Item = mongoose.model("Item", itemsSchema)
-//create new doc
-
-// let defaultItem = {
-// 	name: "Default. Delete me after entering your first todo."
-// }
 
 app.get("/", async (req, res) => {
 	res.render("home")
@@ -95,7 +86,6 @@ app.post("/signup", async (req, res) => {
 
 	await User.findOne({ useremail }).then((user) => {
 		if (user) {
-			console.log("Here")
 			res.redirect("/login")
 		} else {
 			bcrypt.hash(password, saltRound, async (err, hashedPassword) => {
