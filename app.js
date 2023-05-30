@@ -1,19 +1,22 @@
-require("dotenv").config()
-const express = require("express")
-const bodyParser = require("body-parser")
-const mongoose = require("mongoose")
-const _ = require("lodash")
-const bcrypt = require("bcrypt")
-const JWT = require("jsonwebtoken")
+import dotenv from "dotenv"
+import express from "express"
+import bodyParser from "body-parser"
+import mongoose from "mongoose"
+import _ from "lodash"
+import bcrypt from "bcrypt"
+import JWT from "jsonwebtoken"
+import connectDB from "./config.js"
 
+dotenv.config()
 const app = express()
 app.set("view engine", "ejs") //Tell your app to use ejs as the view engine. Must be under the app declaration
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.static("public"))
 
-mongoose.connect("mongodb://localhost:27017/todoListDB")
-// mongoose.connect("mongodb+srv://theophilusadesola002:Test123@todolistcluster.pgb1wum.mongodb.net/")
+// mongoose.connect("mongodb://localhost:27017/todoListDB")
+
+connectDB()
 
 const itemsSchema = new mongoose.Schema(
 	{
