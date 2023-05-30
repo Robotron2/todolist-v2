@@ -1,9 +1,44 @@
-<%- include('./partials/header.ejs') %>
-    <div class="container">
-        <form action="/login" class="form" method="post">
-            <input type="email" name="userEmail" placeholder="Email here">
-            <input type="password" name="userPassword" placeholder="Password here">
-            <button type="submit" class="btn btn-danger">Sign Up</button>
-        </form>
-    </div>
-    <%- include('./partials/footer.ejs') %>
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css' rel='stylesheet'>
+        <link rel="stylesheet" href="/css/loginstyle.css">
+        <title>Sign Up</title>
+    </head>
+
+    <body>
+
+
+
+
+        <div class="content">
+            <div class="text">Login</div>
+            <form action="/login" method="post">
+                <div class="field">
+                    <span class="bx bxs-user"></span>
+                    <input type="username" placeholder="Username" name="username" required>
+                </div>
+
+                <div class="field">
+                    <span class="bx bxs-envelope"></span>
+                    <input type="email" placeholder="Email" name="userEmail" required>
+                </div>
+
+                <div class="field">
+                    <span class="bx bxs-lock-alt"></span>
+                    <input type="password" placeholder="Password" name="userpassword" required>
+                </div>
+
+                <button type="submit">Login</button>
+            </form>
+        </div>
+
+
+</html>
+</body>
+
+</html>

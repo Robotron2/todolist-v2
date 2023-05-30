@@ -1,27 +1,19 @@
+require("dotenv").config()
 const express = require("express")
 const bodyParser = require("body-parser")
 const mongoose = require("mongoose")
 const _ = require("lodash")
-const session = require("express-session")
-const passport = require("passport")
-const passportLocalMongoose = require("passport-local-mongoose")
+const bcrypt = require("bcrypt")
+const jwt = require("jsonwebtoken")
+// const session = require("express-session")
+// const passport = require("passport")
+// const passportLocalMongoose = require("passport-local-mongoose")
 
 const app = express()
 app.set("view engine", "ejs") //Tell your app to use ejs as the view engine. Must be under the app declaration
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.static("public"))
-app.use(
-	session({
-		secret: "Our little secret",
-		resave: false,
-		saveUninitialized: false,
-		cookie: { secure: true }
-	})
-)
-
-app.use(passport.initialize())
-app.use(passport.session())
 
 mongoose.connect("mongodb://localhost:27017/todoListDB")
 // mongoose.connect("mongodb+srv://theophilusadesola002:Test123@todolistcluster.pgb1wum.mongodb.net/")
@@ -47,18 +39,22 @@ const userSchema = new mongoose.Schema({
 	password: {
 		type: String
 	},
+	answer: {
+		type: String,
+		required: true
+	},
 	userTodo: [itemsSchema]
 	// userTodo: [{ type: mongoose.Schema.Types.ObjectId, ref: "itemsSchema" }]
 })
 
-userSchema.plugin(passportLocalMongoose)
+// userSchema.plugin(passportLocalMongoose)
 
 const User = mongoose.model("User", userSchema)
 
-passport.use(User.createStrategy())
+// passport.use(User.createStrategy())
 
-passport.serializeUser(User.serializeUser())
-passport.deserializeUser(User.deserializeUser())
+// passport.serializeUser(User.serializeUser())
+// passport.deserializeUser(User.deserializeUser())
 
 const Item = mongoose.model("Item", itemsSchema)
 //create new doc
@@ -95,31 +91,60 @@ app.get("/users/:userId", async (req, res) => {
 		res.redirect("/login")
 	}
 })
-// app.get("/users/:userId", async (req, res) => {
-// const userId = req.params.userId
-
-// User.findById(userId)
-// 	.then((user) => {
-// 		// console.log(user)
-// 		res.render("list", { usersTodos: user.userTodo, listTitle: user.username, userId })
-// 	})
-// 	.catch((err) => {
-// 		console.log(err)
-// 		//You can create a 404 page here.
-// 	})
-// })
 
 //////////////////////////////////////////Post Requests //////////////////////////////////////////////////////
 
-app.post("/signup", (req, res) => {
+app.post("/signup", async (req, res) => {
 	let username = _.upperFirst(req.body.username)
-	let email = _.toLower(req.body.email)
+	let useremail = _.toLower(req.body.email)
 	let password = req.body.password
-	// console.log(req.body)
-	User.register({ username, useremail: email }, password, (err, user) => {
+	let answer = req.body.answer
+	const saltRound = Number(process.env.SALT_ROUNDS)
+
+	await User.findOne({ useremail }).then((user) => {
+		if (user) {
+			console.log("Here")
+			res.redirect("/login")
+		} else {
+			bcrypt.hash(password, saltRound, async (err, hashedPassword) => {
+				try {
+					const newUser = await new User({
+						username,
+						useremail,
+						password: hashedPassword,
+						answer
+					})
+						.save()
+						.then(async () => {
+							User.findOne({ useremail }).then((user) => {
+								if (user) {
+									res.redirect(`/users/${user._id}`)
+								}
+							})
+						})
+				} catch (error) {
+					console.log(error)
+				}
+			})
+		}
+	})
+
+	// console.log(userEmail, userPassword, userName)
+})
+
+app.post("/login", (req, res) => {
+	const username = _.upperFirst(req.body.username)
+	const email = _.toLower(req.body.userEmail)
+	const password = req.body.password
+
+	const user = new User({
+		username: username,
+		useremail: email,
+		password: password
+	})
+	req.login(user, (err) => {
 		if (err) {
 			console.log(err)
-			res.redirect("/signup")
 		} else {
 			passport.authenticate("local")(req, res, async function () {
 				await User.findOne({ useremail: email })
@@ -133,63 +158,6 @@ app.post("/signup", (req, res) => {
 			})
 		}
 	})
-
-	// console.log(userEmail, userPassword, userName)
-})
-// app.post("/signup", (req, res) => {
-// 	const userName = req.body.userName
-// 	const userEmail = req.body.userEmail
-// 	const userPassword = req.body.userPassword
-
-// 	// console.log(userEmail, userPassword, userName)
-
-// 	const newUser = new User({
-// 		username: userName,
-// 		useremail: userEmail,
-// 		password: userPassword
-// 	})
-// 	newUser
-// 		.save()
-// 		.then(async (result) => {
-// 			// console.log("User saved successfully to the DB!")
-// 			// console.log(result)
-// 			await User.findOne({ useremail: userEmail }).then((user) => {
-// 				// console.log(user._id == "645aa1a9267d7861a27aceb0")
-// 				res.redirect(`/users/${user._id}`)
-// 			})
-
-// 			// res.redirect(`/users/${userName}`)
-// 		})
-// 		.catch((err) => {
-// 			// console.log(err)
-// 			// res.send(err)
-// 			if (err.code) {
-// 				res.send("Email has already been used")
-// 				// Create an error page that displays the error properly. Create buttons that can link to the signUp page.
-// 			}
-// 		})
-// })
-
-app.post("/login", (req, res) => {
-	const email = req.body.userEmail
-	const password = req.body.userPassword
-
-	User.findOne({ useremail: email })
-		.then((user) => {
-			if (user) {
-				if (user.password == password) {
-					res.redirect(`/users/${user._id}`)
-				} else {
-					res.send("Invalid password")
-				}
-			} else {
-				res.send("User not found")
-			}
-			// console.log(user)
-		})
-		.catch((err) => {
-			console.log(err)
-		})
 })
 
 app.post("/users/:userId", async (req, res) => {
@@ -229,111 +197,7 @@ app.post("/delete", (req, res) => {
 				res.send(err)
 			})
 	})
-
-	// console.log("checkedItemId:" + checkedItemId)
-
-	// console.log("userId:" + userId)
-
-	// User.findByIdAndUpdate({ _id: userId }).then((user) => {
-	// 	console.log(typeof user.userTodo.id)
-	// 	// console.log(user)
-	// })
-
-	// User.findOneAndUpdate({ _id: userId }, { $pull: { userTodo: { _id: checkedItemId } } }, { new: true })
-	// 	.then((result) => {
-	// 		// console.log(result)
-	// 		res.redirect(`/users/${userId}`)
-	// 	})
-	// 	.catch((err) => {
-	// 		console.log(err)
-	// 	})
-	// User.findByIdAndUpdate(userId, { $pull: { userTodo: { _id: checkedItemId } } })
-	// 	.then((result) => {
-	// 		console.log(result)
-	// 	})
-	// 	.catch((err) => {
-	// 		console.log(err)
-	// 	})
 })
-
-// app.get("/", async (req, res) => {
-// 	let foundItems = await Item.find({})
-// 	if (foundItems.length === 0) {
-// 		Item.insertMany(defaultItems)
-// 	} else {
-// 		res.render("list", { listTitle: "Today", newListItem: foundItems })
-// 	}
-// })
-
-// app.get("/lists/:customListName", async (req, res) => {
-// 	try {
-// 		const customListName = _.capitalize(req.params.customListName)
-
-// 		const foundList = await List.findOne({ name: customListName }).exec()
-
-// 		if (foundList === null) {
-// 			//Create a new list here
-// 			const list = new List({
-// 				name: customListName,
-// 				items: defaultItems
-// 			})
-// 			await list.save()
-
-// 			res.redirect("/lists/" + customListName)
-// 		} else {
-// 			res.render("list", { listTitle: foundList.name, newListItem: foundList.items })
-// 		}
-// 	} catch (error) {
-// 		console.log(error)
-// 	}
-// })
-
-// app.post("/", async (req, res) => {
-// 	try {
-// 		const itemName = req.body.newItem
-// 		const listName = req.body.list
-
-// 		const item = new Item({
-// 			name: itemName
-// 		})
-
-// 		if (listName === "Today") {
-// 			await item.save()
-// 			res.redirect("/")
-// 		} else {
-// 			const foundList = await List.findOne({ name: listName })
-// 			if (foundList) {
-// 				foundList.items.push(item)
-// 				await foundList.save()
-// 				res.redirect(`/lists/${listName}`)
-// 				// console.log("Foundddd and done")
-// 			}
-// 		}
-// 	} catch (error) {
-// 		console.log(error)
-// 	}
-// })
-
-// app.app.post("/delete", async (req, res) => {
-// 	const checkedItemId = req.body.checkbox
-// 	const listName = req.body.listName
-
-// 	if (listName === "Today") {
-// 		await Item.findByIdAndDelete(checkedItemId)
-// 		// console.log("Deleted successfully.")
-// 		res.redirect("/")
-// 	} else {
-// 		try {
-// 			const updatedResult = await List.findOneAndUpdate({ name: listName }, { $pull: { items: { _id: checkedItemId } } })
-// 			console.log(updatedResult)
-// 			// console.log("Deleted successfully on newlist")
-// 			res.redirect("/lists/" + listName)
-// 		} catch (error) {
-// 			// console.log(error + "Errrrrr")
-// 			res.send(error)
-// 		}
-// 	}
-// })
 
 app.listen("4000", () => {
 	console.log("Server started on port 4000")

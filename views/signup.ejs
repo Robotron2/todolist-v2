@@ -1,10 +1,66 @@
-<%- include('./partials/header.ejs') %>
-    <div class="container">
-        <form action="/signup" class="form-control" method="post">
-            <input type="text" name="username" placeholder="Firstname here" required>
-            <input type="email" name="email" placeholder="Email here" required>
-            <input type="password" name="password" placeholder="Password here" required>
-            <button type="submit" class="btn btn-danger">Sign Up</button>
-        </form>
-    </div>
-    <%- include('./partials/footer.ejs') %>
+<!-- <div class="container">
+
+
+
+    <form class="form-signin" action="/signup" method="post">
+
+        <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+        <label for="inputEmail" class="sr-only">Email address</label>
+        <input type="text" name="username" placeholder="Firstname here" required>
+        <input type="email" name="email" placeholder="Email here" required>
+        <input type="password" name="password" placeholder="Password here" required>
+        <button type="submit" class="btn btn-lg">Sign Up</button>
+
+
+    </form>
+</div> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href='https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css' rel='stylesheet'>
+        <link rel="stylesheet" href="/css/loginstyle.css">
+        <title>Sign Up</title>
+    </head>
+
+    <body>
+
+
+
+
+        <div class="content">
+            <div class="text">Sign Up</div>
+            <form action="/signup" method="post">
+                <div class="field">
+                    <span class="bx bxs-user"></span>
+                    <input type="text" name="username" placeholder="Firstname here" required>
+                </div>
+
+                <div class="field">
+                    <span class="bx bxs-envelope"></span>
+                    <input type="email" name="email" placeholder="Email here" required>
+                </div>
+
+                <div class="field">
+                    <span class="bx bxs-lock-alt"></span>
+                    <input type="password" name="password" placeholder="Password here" required>
+                </div>
+                <div class="field">
+                    <span class="bx bxs-lock-alt"></span>
+                    <input type="Text" name="answer" placeholder="Secret word" required>
+                </div>
+
+                <button type="submit">Sign Up</button>
+            </form>
+        </div>
+
+
+</html>
+</body>
+
+</html>
